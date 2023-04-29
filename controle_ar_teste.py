@@ -1,53 +1,63 @@
+from mysql.connector import connect
 
+def obtemConexaoComMySQL (servidor, usuario, senha, bd):
+    if obtemConexaoComMySQL.conexao==None:
+        obtemConexaoComMySQL.conexao = \
+        connect(host='localhost', user='root', passwd='1234', database='projeto_integrador')
+    return obtemConexaoComMySQL.conexao
+obtemConexaoComMySQL.conexao=None
 
-def formula_calculo(lista_de_dicionarios):
-    valor_concentracao = input("Digite o valor da concentração obtido em campo: ")
-    valor_concentracao = float(valor_concentracao)
+# def formula_calculo(lista_de_dicionarios):
 
-    if valor_concentracao < 1:
-        print("Digite numeros positivos!")
+    # for dicionario in lista_dicionarios:
+
+    #     valor_concentracao =dicionario['nome']
+    #     valor_concentracao = float(valor_concentracao)
+
+    # if valor_concentracao < 1:
+    #     print("Digite numeros positivos!")
     
-    else:
+    # else:
 
-        for elemento in lista_dicionarios:
+    #     for elemento in lista_dicionarios:
 
-            if valor_concentracao >= 0 and valor_concentracao <= elemento['concentracao1']:
+    #         if valor_concentracao >= 0 and valor_concentracao <= elemento['concentracao1']:
 
-                calculo = elemento['calculo_1']
-                calculo_final = calculo * valor_concentracao
-                resultado.append(calculo_final)
+    #             calculo = elemento['calculo_1']
+    #             calculo_final = calculo * valor_concentracao
+    #             resultado.append(calculo_final)
 
-            elif valor_concentracao > elemento['concentracao1'] and valor_concentracao <= elemento['concentracao2']:
+    #         elif valor_concentracao > elemento['concentracao1'] and valor_concentracao <= elemento['concentracao2']:
 
-                calculo_2 = elemento['calculo_2']    
-                calculo_3 = valor_concentracao - elemento['concentracao1']     
-                calculo_4 = calculo_2 * calculo_3
-                calculo_final = calculo_4 + elemento['valor1'] 
-                resultado.append(calculo_final)   
+    #             calculo_2 = elemento['calculo_2']    
+    #             calculo_3 = valor_concentracao - elemento['concentracao1']     
+    #             calculo_4 = calculo_2 * calculo_3
+    #             calculo_final = calculo_4 + elemento['valor1'] 
+    #             resultado.append(calculo_final)   
 
-            elif valor_concentracao > elemento['concentracao3'] and valor_concentracao <= elemento['concentracao4']:
+    #         elif valor_concentracao > elemento['concentracao3'] and valor_concentracao <= elemento['concentracao4']:
 
-                calculo_2 = elemento['calculo_3']
-                calculo_3 = valor_concentracao - elemento['concentracao2']
-                calculo_4 = calculo_2 * calculo_3
-                calculo_final = calculo_4 + elemento['valor2']
-                resultado.append(calculo_final)
+    #             calculo_2 = elemento['calculo_3']
+    #             calculo_3 = valor_concentracao - elemento['concentracao2']
+    #             calculo_4 = calculo_2 * calculo_3
+    #             calculo_final = calculo_4 + elemento['valor2']
+    #             resultado.append(calculo_final)
 
-            elif valor_concentracao > elemento['concentracao3'] and valor_concentracao < elemento['concentracao4']:
+    #         elif valor_concentracao > elemento['concentracao3'] and valor_concentracao < elemento['concentracao4']:
 
-                calculo_2 = elemento['calculo_4']
-                calculo_3 = valor_concentracao - elemento['concentracao3']
-                calculo_4 = calculo_2 * calculo_3
-                calculo_final = calculo_4 + elemento['valor3']
-                resultado.append(calculo_final)
+    #             calculo_2 = elemento['calculo_4']
+    #             calculo_3 = valor_concentracao - elemento['concentracao3']
+    #             calculo_4 = calculo_2 * calculo_3
+    #             calculo_final = calculo_4 + elemento['valor3']
+    #             resultado.append(calculo_final)
 
-            elif valor_concentracao < 250 and valor_concentracao <= 3000:
+    #         elif valor_concentracao > elemento['concentracao4'] and valor_concentracao <= 3000:
 
-                calculo_2 = elemento['calculo_5']
-                calculo_3 = valor_concentracao - elemento['concentracao4']
-                calculo_4 = calculo_2 * calculo_3
-                calculo_final = calculo_4 + elemento['valor3']
-                resultado.append(calculo_final)
+    #             calculo_2 = elemento['calculo_5']
+    #             calculo_3 = valor_concentracao - elemento['concentracao4']
+    #             calculo_4 = calculo_2 * calculo_3
+    #             calculo_final = calculo_4 + elemento['valor3']
+    #             resultado.append(calculo_final)
 
 
 
@@ -55,7 +65,7 @@ resultado = []
 
 lista_dicionarios = [{
 
-    'nome' : 'MCP10',
+    'nome' : 'select MCP10 from elementos',
     'valor1' : 41,
     'valor2' : 81,
     'valor3' : 121,
@@ -73,5 +83,21 @@ lista_dicionarios = [{
 ]
 
 
-formula_calculo(lista_dicionarios)
-print(resultado)
+for dicionario in lista_dicionarios:
+    dicionario = dicionario
+
+
+conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
+cursor=conexao.cursor()
+cursor.execute(dicionario['nome'])
+dadosSelecionados=cursor.fetchall()
+
+for linha in dadosSelecionados:
+    print(linha)
+
+
+# formula_calculo(lista_dicionarios)
+# print(resultado)
+
+
+
