@@ -7,11 +7,15 @@ def obtemConexaoComMySQL (servidor, usuario, senha, bd):
     return obtemConexaoComMySQL.conexao
 obtemConexaoComMySQL.conexao=None
 
+resposta_usuario = ''
+resposta_de_saida = ''
+
 resultado = []
 resultado_aproximado = []
 
 lista_dicionarios = [{
 
+    'elemento' : 'MCP10',
     'nome' : 'select MCP10 from elementos',
     'valor1' : 41,
     'valor2' : 81,
@@ -29,6 +33,7 @@ lista_dicionarios = [{
 },
 
 {
+    'elemento' : 'MP2_5',
     'nome' : 'select MP2_5 from elementos',
     'valor1' : 41,
     'valor2' : 81,
@@ -46,6 +51,7 @@ lista_dicionarios = [{
 },
 
 {
+    'elemento' : 'O3',
     'nome' : 'select O3 from elementos',
     'valor1' : 41,
     'valor2' : 81,
@@ -62,6 +68,7 @@ lista_dicionarios = [{
     'calculo_5' : 0.00282143, # --> (200-121)/(3000-200)
 },
 {
+    'elemento' : 'MCO',
     'nome' : 'select MCO from elementos',
     'valor1' : 41,
     'valor2' : 81,
@@ -78,6 +85,7 @@ lista_dicionarios = [{
     'calculo_5' : 0.0264657, # --> (200-121)/(3000-15)
 },
 {
+    'elemento' : 'NO2',
     'nome' : 'select NO2 from elementos',
     'valor1' : 41,
     'valor2' : 81,
@@ -94,6 +102,7 @@ lista_dicionarios = [{
     'calculo_5' : 0.042246, # --> (200-121)/(3000-1130)
 },
 {
+    'elemento' : 'SO2',
     'nome' : 'select SO2 from elementos',
     'valor1' : 41,
     'valor2' : 81,
@@ -119,8 +128,7 @@ def formula_calculo(lista_de_dicionarios):
         conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
         cursor=conexao.cursor()
         cursor.execute(dicionario['nome'])
-
-        dadosSelecionados=cursor.fetchall()
+        dadosSelecionados=cursor.fetchall()  # se for leitura do banco é fetchall
 
         for linha in dadosSelecionados:
             valor_concentracao = list(linha)
@@ -177,12 +185,15 @@ def formula_calculo(lista_de_dicionarios):
 
 def verifica_pior_indice(lista_resultado_aproximado):
 
+    resultado_aproximado = []
+
     for valor in resultado:
 
         valor = f'{valor:.2f}'
         resultado_aproximado.append(valor)
 
-    print(resultado_aproximado)
+    print()
+    print(f'Os índices calculados foram: {resultado_aproximado}')
 
     maior_valor_atual = 0
 
@@ -192,8 +203,10 @@ def verifica_pior_indice(lista_resultado_aproximado):
 
         if maior_valor > maior_valor_atual:
             maior_valor_atual = maior_valor
-            
-    print(maior_valor_atual)
+
+    print()        
+    print(f'O pior índice encontrado foi: {maior_valor_atual}')
+    print()
 
     if maior_valor_atual >= 0 and maior_valor_atual <= 40:
         print('Qualidade N1 - BOA')
@@ -211,5 +224,110 @@ def verifica_pior_indice(lista_resultado_aproximado):
         print('Qualidade N5 - PÉSSIMA')
 
 
-formula_calculo(lista_dicionarios)
-verifica_pior_indice(resultado)
+def create():
+
+    conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
+    cursor=conexao.cursor()
+
+    lista_valores_digitados = []
+
+    for elemento in lista_dicionarios:
+
+        elemento = elemento['elemento']
+
+        valor_digitado = float(input(f'Digite a concentração de {elemento}: '))
+
+        lista_valores_digitados.append(valor_digitado)
+
+
+    mcp10,mp2_5,o3,mco,no2,so2 = lista_valores_digitados
+
+    comando = f'INSERT INTO elementos (MCP10,MP2_5,O3,MCO,NO2,SO2) VALUES {mcp10,mp2_5,o3,mco,no2,so2};'
+    cursor.execute(comando)
+    conexao.commit()
+
+def read():
+
+    conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
+    cursor=conexao.cursor()
+
+    comando = 'select * from elementos;'
+    cursor.execute(comando)
+    dados_selecionados = cursor.fetchall() 
+    print(f'Os valores inseridos foram: {dados_selecionados}.')
+
+
+def update():
+
+    conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
+    cursor=conexao.cursor()
+
+    elemento_a_alterar = input('Qual elemento deseja alterar: ').upper()
+    novo_valor = float(input('Digite um novo valor de concentração: '))
+
+    comando = f'UPDATE ELEMENTOS SET {elemento_a_alterar} = {novo_valor}'
+    cursor.execute(comando)
+    conexao.commit()
+
+def delete():
+
+    conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
+    cursor=conexao.cursor()
+
+    comando = f'DELETE FROM ELEMENTOS WHERE MCP10 > -1 OR MP2_5 > -1 OR O3 > -1 OR MCO > -1 OR NO2 > -1 OR SO2 > -1'
+    cursor.execute(comando)
+    conexao.commit()
+
+
+while True:
+
+    delete()
+    print('Insira as concentrações obtidas em campo para que o programa calcula a qualidade do ar.')
+    print()
+
+    create()
+    formula_calculo(lista_dicionarios)
+    verifica_pior_indice(resultado)
+
+
+    while True:
+
+        print()
+        resposta_usuario = input('Você deseja realizar alguma ação? [listar] ou [atualizar] ou [inserir]: ').lower()
+        print()
+
+        if resposta_usuario in ['listar','atualizar','inserir']:
+            break
+        else:
+            print('Por favor, digite uma das opções corretamente')
+
+    if resposta_usuario == 'listar':
+        read()
+
+    elif resposta_usuario == 'atualizar':
+        update()
+        resultado = []
+        resultado_aproximado = []
+        formula_calculo(lista_dicionarios)
+        verifica_pior_indice(resultado)
+        
+
+    else:
+        delete()
+        continue
+
+    while True:
+
+        print()
+        resposta_de_saida = input('Você deseja sair do programa? [sim] ou [nao]: ').lower()
+
+        if resposta_de_saida in ['sim','s','nao','n']:
+            break
+        else:
+            print('Por favor, digite [sim] ou [nao]')
+
+    if resposta_de_saida in ['sim','s']:
+        break
+
+print()
+print('Obrigado por utilizar nosso programa!')
