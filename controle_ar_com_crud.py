@@ -126,7 +126,7 @@ def create(numero_linha):
 
     lista_valores_digitados = []
 
-    for elemento in lista_dicionarios:
+    for elemento in define_dicionarios():
 
         elemento = elemento['elemento']
 
@@ -177,22 +177,71 @@ def update():
     cursor.execute(comando)
     conexao.commit()
 
+    return linha_a_alterar
+
 def delete():
+
+    read()
 
     conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
     cursor=conexao.cursor()
 
-    comando = f'DELETE FROM ELEMENTOS WHERE nmr_linha > -1 OR MCP10 > -1 OR MP2_5 > -1 OR O3 > -1 OR MCO > -1 OR NO2 > -1 OR SO2 > -1'
+    linha_a_deletar = int(input('Digite a linha que deseja deletar: '))
+
+    contador_de_linhas = linha_a_deletar
+
+    comando = f'DELETE FROM ELEMENTOS WHERE nmr_linha = "{linha_a_deletar}"'
+    cursor.execute(comando)
+    conexao.commit()
+
+    comando_le_banco = 'select * from elementos'
+    cursor.execute(comando_le_banco)
+    dados_lidos = cursor.fetchall()
+
+    total_linhas = pega_ultima_linha()
+
+    for lista_dados in dados_lidos:
+
+        indice_linha, mcp10, mp2_5, o3, mco, no2, so2 = lista_dados
+
+
+        for atualiza_linha in range (1, total_linhas+1):
+
+            comando_atualiza_linha = f'UPDATE ELEMENTOS SET nmr_linha = "{atualiza_linha}" where MCP10 = "{mcp10}" AND MP2_5 = "{mp2_5}" AND O3 = "{o3}" AND MCO = "{mco}" AND NO2 = "{no2}" AND SO2 = "{so2}" '
+            cursor.execute(comando_atualiza_linha)
+            conexao.commit()
+            contador_de_linhas += 1
+            break
+
+
+def geral_delete():
+
+    conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
+    cursor=conexao.cursor()
+
+    comando = f'DELETE FROM ELEMENTOS WHERE nmr_linha > -1 OR MCP10 > -1 OR MP2_5 > -1 OR O3 > -1 OR MCO > -1 OR NO2 > -1 OR SO2 > -1 '
     cursor.execute(comando)
     conexao.commit()
 
 
-delete()
-passar_comeco = False
-while True:
+def pega_ultima_linha():
 
-    resultado = []
-    resultado_aproximado = []
+    conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
+    cursor=conexao.cursor()
+
+    comando = 'SELECT COUNT(*) FROM ELEMENTOS'
+    cursor.execute(comando)
+    lista_qtd_linhas = cursor.fetchall()
+
+    for tupla_qtd_linhas in lista_qtd_linhas:
+        for valor_linhas in tupla_qtd_linhas:
+
+            qtd_linhas = valor_linhas
+    
+    return qtd_linhas
+
+
+def define_dicionarios():
 
     lista_dicionarios = [{
 
@@ -301,6 +350,17 @@ while True:
         },
     ]
 
+    return lista_dicionarios
+
+
+
+geral_delete()
+passar_comeco = False
+while True:
+
+    resultado = []
+    resultado_aproximado = []
+
     if passar_comeco:
         pass
     else:
@@ -308,7 +368,7 @@ while True:
         print()
 
         create(numero_da_linha)
-        formula_calculo(lista_dicionarios)
+        formula_calculo(define_dicionarios())
         verifica_pior_indice(resultado)
 
 
@@ -329,15 +389,16 @@ while True:
         passar_comeco = True
 
     elif resposta_usuario == 'atualizar':
-        update()
+        numero_da_linha = update()
         resultado = []
         resultado_aproximado = []
-        formula_calculo(lista_dicionarios)
+        formula_calculo(define_dicionarios())
         verifica_pior_indice(resultado)
         passar_comeco = True
         
     elif resposta_usuario == 'inserir':
-        numero_da_linha +=1
+
+        numero_da_linha = pega_ultima_linha() + 1
         continue
 
     elif resposta_usuario == 'sair':
@@ -345,22 +406,12 @@ while True:
 
     elif resposta_usuario == 'deletar':
 
-        read()
-
-        while True:
-        
-            try: 
-                linha_a_deletar = int(input('Digite a linha que você deseja deletar: '))
-                break
-
-            except ValueError:
-                print('Por favor, digite o número da linha que aparece como sendo o primeiro número de cada lista.')
+        delete()
 
         """
             A fazer:
                 Arrumar a query para deletar apenas a linha desejada pelo usuário. Além disso, após excluir uma linha, deverá ser feita uma query
                 no banco para atualizar a outra linha já existente e diminuir seu número de linha.
-                Arrumar a maneira como as linhas aparecem para o usuário para facilitar a interpretação de o que é cada coisa que aparece.
         """
 
 
