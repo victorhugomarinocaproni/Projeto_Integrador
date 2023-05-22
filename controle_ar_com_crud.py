@@ -149,18 +149,31 @@ def read():
     comando = 'select * from elementos;'
     cursor.execute(comando)
     dados_selecionados = cursor.fetchall() 
-    print(f'Os valores inseridos foram: {dados_selecionados}.')
 
+    print('Os valores selecionados foram: ')
+    print()
+
+    for lista_dados in dados_selecionados:
+
+        indice_linha, mcp10, mp2_5,o3,mco,no2,so2 = lista_dados
+
+        print(f'Linha: {indice_linha}')
+        print(f'MCP10: {mcp10}, MP2_5: {mp2_5}, O3: {o3}, MCO: {mco}, NO2: {no2}, SO2: {so2}')
+        print()
+    
 
 def update():
+
+    read()
 
     conexao=obtemConexaoComMySQL('localhost','root','1234','projeto_integrador')
     cursor=conexao.cursor()
 
-    elemento_a_alterar = input('Qual elemento deseja alterar: ').upper()
+    linha_a_alterar = int(input('Digite o índice da linha que deseja alterar: '))
+    elemento_a_alterar = input('Digite o nome do elemento que deseja alterar: ').upper()
     novo_valor = float(input('Digite um novo valor de concentração: '))
 
-    comando = f'UPDATE ELEMENTOS SET {elemento_a_alterar} = {novo_valor}'
+    comando = f'UPDATE ELEMENTOS SET {elemento_a_alterar} = {novo_valor} where nmr_linha="{linha_a_alterar}"'
     cursor.execute(comando)
     conexao.commit()
 
@@ -316,20 +329,12 @@ while True:
         passar_comeco = True
 
     elif resposta_usuario == 'atualizar':
-        read()
         update()
         resultado = []
         resultado_aproximado = []
         formula_calculo(lista_dicionarios)
         verifica_pior_indice(resultado)
         passar_comeco = True
-
-        """
-            A fazer:
-                Arrumar a maneira como a lista aparece para o usuário, e pedir pra ele escolher qual linha quer alterar.
-                Além disso, após pedir a linha, o programa deve pedir para o usuário qual elemento ele deseja atualizar, e limitar
-                esta mudança apenas na linha escolhida. (limitar usando o WHERE na query).
-        """
         
     elif resposta_usuario == 'inserir':
         numero_da_linha +=1
